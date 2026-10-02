@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "anomaly-data-pipeline"
+version = "0.1.0"
+description = "Deterministic synthetic banking data and event stream generator for AnomalyBank"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["mimesis>=22.2,<23", "pydantic>=2.10,<3", "typer>=0.15,<1", "PyYAML>=6,<7"]
+
+[project.scripts]
+anomaly-data = "anomaly_data_pipeline.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/anomaly_data_pipeline"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

@@ -1,0 +1,9 @@
+seed: 20261002
+customers: 100
+transactions_per_customer: 25
+anomaly_rate: 0.02
+start_at: "2025-01-01T00:00:00+07:00"
+days: 180
+output_dir: "data/generated"
+source_profile: "paysim-inspired"
+
