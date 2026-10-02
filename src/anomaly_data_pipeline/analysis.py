@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import statistics
 from collections import Counter, defaultdict
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -96,12 +96,135 @@ def analyze(data_dir: Path, report_dir: Path) -> None:
         for row in month_rows:
             output.write(",".join(map(str, row)) + "\n")
 
+    dashboard = _dashboard_payload(customers, accounts, loan_packages, applications, loans,
+                                   transactions, labels, manifest, month_rows, class_rows)
+    (report_dir / "dashboard.json").write_text(json.dumps(dashboard, indent=2) + "\n", encoding="utf-8")
+
 
 def _pct(current: float, previous: float) -> str:
     if previous == 0:
         return "n/a" if current == 0 else "+∞"
     value = (current - previous) / previous * 100
     return f"{value:+.1f}%"
+
+
+def _dashboard_payload(customers: list[dict[str, Any]], accounts: list[dict[str, Any]],
+                       loan_packages: list[dict[str, Any]], applications: list[dict[str, Any]],
+                       loans: list[dict[str, Any]], transactions: list[dict[str, Any]],
+                       labels: dict[str, dict[str, Any]], manifest: dict[str, Any],
+                       month_rows: list[tuple[Any, ...]], class_rows: list[tuple[Any, ...]]) -> dict[str, Any]:
+    anomaly_count = sum(bool(row["is_anomaly"]) for row in labels.values())
+    fields: list[dict[str, Any]] = []
+
+    def add_range(name: str, values: list[int | float], unit: str = "") -> None:
+        if values:
+            fields.append({"field": name, "kind": "range", "min": min(values), "max": max(values), "unit": unit})
+
+    add_range("Age at simulation start", [(date.fromisoformat(manifest["start_at"][:10]) - date.fromisoformat(r["profile"]["date_of_birth"])).days // 365 for r in customers], "years")
+    add_range("Monthly income", [r["profile"]["demographics"]["monthly_income"] for r in customers], "VND")
+    add_range("Credit score", [r["credit_profile"]["score"] for r in customers], "points")
+    add_range("Credit history score", [p["score"] for r in customers for p in r["credit_profile"]["history"]], "points")
+    add_range("Opening account balance", [r["balance"]["current"] for r in accounts], "VND")
+    add_range("Loan request", [r["request"]["amount"] for r in applications], "VND")
+    add_range("Loan term", [r["request"]["term_months"] for r in applications], "months")
+    add_range("Loan principal", [r["principal"] for r in loans], "VND")
+    add_range("Outstanding principal", [r["outstanding_principal"] for r in loans], "VND")
+    add_range("Loan interest rate", [r["interest_rate"] * 100 for r in loans], "%/year")
+    add_range("Transaction amount", [int(r["amount"]) for r in transactions], "VND")
+    add_range("Risk score", [float(r["risk"]["score"]) for r in transactions], "0–1")
+
+    customer_by_id = {row["_id"]: row for row in customers}
+    account_by_id = {row["_id"]: row for row in accounts}
+    monthly_field_values: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
+    for tx in transactions:
+        month = tx["created_at"][:7]
+        customer = customer_by_id.get(tx.get("source", {}).get("customer_id"))
+        account = account_by_id.get(tx.get("source", {}).get("account_id"))
+        values: dict[str, float] = {
+            "Transaction amount": float(tx["amount"]),
+            "Risk score": float(tx["risk"]["score"]),
+        }
+        if customer:
+            values.update({
+                "Monthly income": float(customer["profile"]["demographics"]["monthly_income"]),
+                "Credit score": float(customer["credit_profile"]["score"]),
+                "Age at simulation start": float((date.fromisoformat(manifest["start_at"][:10]) - date.fromisoformat(customer["profile"]["date_of_birth"])).days // 365),
+            })
+        if account:
+            values["Opening account balance"] = float(account["balance"]["current"])
+        for field, value in values.items():
+            monthly_field_values[field][month].append(value)
+    field_histograms = []
+    for field, by_month_values in monthly_field_values.items():
+        all_values = [value for values in by_month_values.values() for value in values]
+        minimum, maximum = min(all_values), max(all_values)
+        bucket_count = min(8, max(1, len(set(all_values))))
+        if minimum == maximum:
+            edges = [minimum, maximum]
+        else:
+            edges = [minimum + (maximum - minimum) * index / bucket_count for index in range(bucket_count + 1)]
+        bins = []
+        for index in range(bucket_count):
+            lower, upper = edges[index], edges[index + 1]
+            bins.append({"min": lower, "max": upper, "count": 0, "months": {}})
+        for month, values in sorted(by_month_values.items()):
+            counts = [0] * bucket_count
+            for value in values:
+                bucket = bucket_count - 1 if value == maximum else min(bucket_count - 1, int((value - minimum) / (maximum - minimum) * bucket_count)) if maximum != minimum else 0
+                counts[bucket] += 1
+            for index, count in enumerate(counts):
+                bins[index]["count"] += count
+                bins[index]["months"][month] = count
+        field_histograms.append({"field": field, "min": minimum, "max": maximum, "bins": bins})
+
+    categorical_sources = {
+        "Transaction type": [r["type"] for r in transactions],
+        "Transaction status": [r["status"] for r in transactions],
+        "Transaction channel": [r["channel"] for r in transactions],
+        "Province": [r["profile"]["address"]["province_code"] for r in customers],
+        "Occupation": [r["profile"]["demographics"]["occupation"] for r in customers],
+        "Age band": [r["profile"]["demographics"]["age_band"] for r in customers],
+        "Credit payment status": [p["payment_status"] for r in customers for p in r["credit_profile"]["history"]],
+        "Loan package": [r["package_code"] for r in loan_packages],
+        "Loan application status": [r["status"] for r in applications],
+        "Loan status": [r["status"] for r in loans],
+        "Calendar tags": [tag for r in transactions for tag in r["calendar_context"]["tags"]],
+    }
+    categories = [{"name": name, "values": [{"label": label, "count": count}
+                                              for label, count in Counter(values).most_common()]}
+                  for name, values in categorical_sources.items()]
+
+    monthly = [{"month": row[0], "transactions": row[1], "dailyAverage": float(row[2]),
+                "amountTotalVnd": int(row[3]),
+                "dailyChangePct": None if row[4] == "—" else float(str(row[4]).rstrip("%")),
+                "anomalies": row[5]} for row in month_rows]
+    special_days = [{"tag": row[0], "days": row[1], "transactionsPerDay": float(row[2]),
+                     "transactionChangePct": _parse_percent(row[3]), "amountPerDayVnd": int(row[4]),
+                     "amountChangePct": _parse_percent(row[5])} for row in class_rows]
+    total_amount = sum(int(row["amount"]) for row in transactions)
+    return {
+        "metadata": {"seed": manifest["seed"], "sourceProfile": manifest["source_profile"],
+                     "calendarProfile": manifest["calendar_profile"], "startDate": manifest["start_at"][:10],
+                     "endDate": (date.fromisoformat(manifest["end_date_exclusive"]) - timedelta(days=1)).isoformat(),
+                     "days": manifest["days"]},
+        "summary": {"customers": len(customers), "accounts": len(accounts), "transactions": len(transactions),
+                    "events": manifest["counts"]["events"], "loans": len(loans),
+                    "approvedApplications": sum(r["status"] == "approved" for r in applications),
+                    "anomalies": anomaly_count,
+                    "anomalyRatePct": round(anomaly_count / len(transactions) * 100, 2) if transactions else 0,
+                    "amountTotalVnd": total_amount},
+        "monthlyTraffic": monthly,
+        "specialDayTraffic": special_days,
+        "fieldRanges": fields,
+        "fieldHistograms": field_histograms,
+        "categories": categories,
+    }
+
+
+def _parse_percent(value: str) -> float | None:
+    if value == "n/a":
+        return None
+    return float(value.rstrip("%"))
 
 
 def _field_ranges(customers: list[dict[str, Any]], accounts: list[dict[str, Any]],

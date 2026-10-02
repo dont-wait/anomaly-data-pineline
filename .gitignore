@@ -5,6 +5,10 @@ __pycache__/
 .coverage
 data/*
 !data/.gitkeep
+client/node_modules/
+client/dist/
+client/public/dashboard.json
+client/public/monthly-traffic.csv
 *.egg-info/
 dist/
 build/

@@ -15,6 +15,7 @@
           default = pkgs.mkShell {
             packages = [
               pkgs.gnumake
+              pkgs.nodejs_22
               pkgs.python313
               pkgs.uv
             ];

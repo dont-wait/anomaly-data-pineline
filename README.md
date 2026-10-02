@@ -4,21 +4,25 @@ Repo sinh dữ liệu ngân hàng tổng hợp, liên kết theo khách hàng v�
 
 ## Bắt đầu nhanh
 
-Cần Nix có hỗ trợ flakes. Vào dev shell, cài dependency theo lockfile, rồi sinh dataset và báo cáo:
+Cần Nix có hỗ trợ flakes. Vào dev shell, cài dependency Python và frontend theo lockfile, rồi sinh dataset và báo cáo:
 
 ```bash
 nix develop
 make setup
+make ui-install
 make pipeline
+make ui-dev
 ```
 
-`make pipeline` chạy lần lượt `generate` và `report`. Dữ liệu JSONL được ghi vào `data/generated/`; hai báo cáo được ghi vào `reports/`.
+`make pipeline` chạy lần lượt `generate` và `report`, đồng thời copy `dashboard.json` và CSV vào `client/public/` để Vite phục vụ cho giao diện. Mở URL Vite được in ra terminal để xem dashboard. Dữ liệu JSONL được ghi vào `data/generated/`; báo cáo Markdown, CSV và JSON được ghi vào `reports/`.
 
 Nếu không muốn mở shell tương tác:
 
 ```bash
 nix develop --command make setup
+nix develop --command make ui-install
 nix develop --command make pipeline
+nix develop --command make ui-dev
 ```
 
 ## Các lệnh Make
@@ -33,6 +37,9 @@ Chạy `make help` để xem danh sách. Những target thường dùng:
 | `make pipeline` | Sinh dataset rồi cập nhật báo cáo |
 | `make shell` | Mở Nix dev shell |
 | `make clean` | Xóa thư mục output của dataset và báo cáo |
+| `make ui-install` | Cài React/Vite dependencies theo `client/package-lock.json` |
+| `make ui-dev` | Mở dashboard Vite ở `http://127.0.0.1:5173` |
+| `make ui-build` | Build dashboard tĩnh vào `client/dist/` |
 
 Có thể thay cấu hình và số lượng dữ liệu bằng Make variables:
 
@@ -94,6 +101,9 @@ Không đưa ground-truth label vào event payload đầu vào detector. Giao d�
 
 - `reports/dataset-analysis.md`: range số và phân bố category, tổng lượng dữ liệu, anomaly rate, lưu lượng theo tháng, chênh lệch ngày sale/lễ so với ngày thường.
 - `reports/monthly-traffic.csv`: số giao dịch, trung bình/ngày, tổng giá trị VND và thay đổi so với tháng trước.
+- `reports/dashboard.json`: dữ liệu có cấu trúc mà dashboard React đọc.
+
+Dashboard nằm trong `client/`. Sau khi chạy `make pipeline`, dùng `make ui-dev` để xem biểu đồ lưu lượng theo tháng, chọn tháng để đổi KPI, xem loại giao dịch, ngày sale/lễ và tìm trường trong bảng min–max. Nút **Tải CSV** tải dữ liệu lưu lượng tháng.
 
 Các kết quả trong report phụ thuộc seed và cấu hình. Chênh lệch của một seed cho biết generator đã phân bổ dữ liệu ra sao, không chứng minh ngày lễ/sale ngoài đời làm giao dịch tăng tương ứng.
 
@@ -110,7 +120,7 @@ src/anomaly_data_pipeline/
 └── analysis.py             # Range fields, monthly traffic và ngày đặc biệt
 ```
 
-`flake.nix` cung cấp Python 3.13, `uv` và `make`; `flake.lock` khóa phiên bản Nixpkgs. `uv.lock` khóa dependency Python. Mimesis locale EN tạo tên/email/địa chỉ nền; province, nghề nghiệp, tuổi, thu nhập và quy tắc nghiệp vụ dùng vocabularies của generator nên chưa đại diện cho phân phối nhân khẩu Việt Nam thực tế.
+`flake.nix` cung cấp Python 3.13, Node.js 22, `uv` và `make`; `flake.lock` khóa phiên bản Nixpkgs. `uv.lock` và `client/package-lock.json` khóa dependency Python/JavaScript. Mimesis locale EN tạo tên/email/địa chỉ nền; province, nghề nghiệp, tuổi, thu nhập và quy tắc nghiệp vụ dùng vocabularies của generator nên chưa đại diện cho phân phối nhân khẩu Việt Nam thực tế.
 
 ## Phạm vi hiện tại
 

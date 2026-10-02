@@ -1,0 +1,1228 @@
+{
+  "metadata": {
+    "seed": 20261002,
+    "sourceProfile": "paysim-inspired",
+    "calendarProfile": "vietnam-2025-demo",
+    "startDate": "2025-01-01",
+    "endDate": "2025-06-30",
+    "days": 181
+  },
+  "summary": {
+    "customers": 100,
+    "accounts": 100,
+    "transactions": 2500,
+    "events": 3054,
+    "loans": 38,
+    "approvedApplications": 38,
+    "anomalies": 47,
+    "anomalyRatePct": 1.88,
+    "amountTotalVnd": 7554536875
+  },
+  "monthlyTraffic": [
+    {
+      "month": "2025-01",
+      "transactions": 451,
+      "dailyAverage": 14.55,
+      "amountTotalVnd": 1363171531,
+      "dailyChangePct": null,
+      "anomalies": 9
+    },
+    {
+      "month": "2025-02",
+      "transactions": 367,
+      "dailyAverage": 13.11,
+      "amountTotalVnd": 1151962825,
+      "dailyChangePct": -9.9,
+      "anomalies": 8
+    },
+    {
+      "month": "2025-03",
+      "transactions": 394,
+      "dailyAverage": 12.71,
+      "amountTotalVnd": 1166918073,
+      "dailyChangePct": -3.0,
+      "anomalies": 8
+    },
+    {
+      "month": "2025-04",
+      "transactions": 430,
+      "dailyAverage": 14.33,
+      "amountTotalVnd": 1319022368,
+      "dailyChangePct": 12.8,
+      "anomalies": 8
+    },
+    {
+      "month": "2025-05",
+      "transactions": 455,
+      "dailyAverage": 14.68,
+      "amountTotalVnd": 1409707012,
+      "dailyChangePct": 2.4,
+      "anomalies": 7
+    },
+    {
+      "month": "2025-06",
+      "transactions": 403,
+      "dailyAverage": 13.43,
+      "amountTotalVnd": 1143755066,
+      "dailyChangePct": -8.5,
+      "anomalies": 7
+    }
+  ],
+  "specialDayTraffic": [
+    {
+      "tag": "campaign_0101",
+      "days": 1,
+      "transactionsPerDay": 30.0,
+      "transactionChangePct": 140.5,
+      "amountPerDayVnd": 61357415,
+      "amountChangePct": 71.4
+    },
+    {
+      "tag": "campaign_0202",
+      "days": 1,
+      "transactionsPerDay": 34.0,
+      "transactionChangePct": 172.6,
+      "amountPerDayVnd": 138082696,
+      "amountChangePct": 285.8
+    },
+    {
+      "tag": "campaign_0303",
+      "days": 1,
+      "transactionsPerDay": 21.0,
+      "transactionChangePct": 68.3,
+      "amountPerDayVnd": 97236095,
+      "amountChangePct": 171.6
+    },
+    {
+      "tag": "campaign_0404",
+      "days": 1,
+      "transactionsPerDay": 15.0,
+      "transactionChangePct": 20.2,
+      "amountPerDayVnd": 43946987,
+      "amountChangePct": 22.8
+    },
+    {
+      "tag": "campaign_0505",
+      "days": 1,
+      "transactionsPerDay": 43.0,
+      "transactionChangePct": 244.7,
+      "amountPerDayVnd": 181239779,
+      "amountChangePct": 406.3
+    },
+    {
+      "tag": "campaign_0606",
+      "days": 1,
+      "transactionsPerDay": 27.0,
+      "transactionChangePct": 116.4,
+      "amountPerDayVnd": 56670249,
+      "amountChangePct": 58.3
+    },
+    {
+      "tag": "family_day",
+      "days": 1,
+      "transactionsPerDay": 19.0,
+      "transactionChangePct": 52.3,
+      "amountPerDayVnd": 45843450,
+      "amountChangePct": 28.1
+    },
+    {
+      "tag": "holiday_bridge",
+      "days": 3,
+      "transactionsPerDay": 16.0,
+      "transactionChangePct": 28.3,
+      "amountPerDayVnd": 48952122,
+      "amountChangePct": 36.8
+    },
+    {
+      "tag": "hung_kings",
+      "days": 1,
+      "transactionsPerDay": 14.0,
+      "transactionChangePct": 12.2,
+      "amountPerDayVnd": 22949803,
+      "amountChangePct": -35.9
+    },
+    {
+      "tag": "labor_day",
+      "days": 1,
+      "transactionsPerDay": 18.0,
+      "transactionChangePct": 44.3,
+      "amountPerDayVnd": 95135942,
+      "amountChangePct": 165.8
+    },
+    {
+      "tag": "month_end",
+      "days": 19,
+      "transactionsPerDay": 15.05,
+      "transactionChangePct": 20.7,
+      "amountPerDayVnd": 44053562,
+      "amountChangePct": 23.1
+    },
+    {
+      "tag": "new_year",
+      "days": 1,
+      "transactionsPerDay": 30.0,
+      "transactionChangePct": 140.5,
+      "amountPerDayVnd": 61357415,
+      "amountChangePct": 71.4
+    },
+    {
+      "tag": "payday",
+      "days": 36,
+      "transactionsPerDay": 15.81,
+      "transactionChangePct": 26.7,
+      "amountPerDayVnd": 54061389,
+      "amountChangePct": 51.0
+    },
+    {
+      "tag": "regular",
+      "days": 116,
+      "transactionsPerDay": 12.47,
+      "transactionChangePct": 0.0,
+      "amountPerDayVnd": 35795284,
+      "amountChangePct": 0.0
+    },
+    {
+      "tag": "reunification_day",
+      "days": 1,
+      "transactionsPerDay": 23.0,
+      "transactionChangePct": 84.4,
+      "amountPerDayVnd": 68354517,
+      "amountChangePct": 91.0
+    },
+    {
+      "tag": "tet_period",
+      "days": 9,
+      "transactionsPerDay": 20.44,
+      "transactionChangePct": 63.9,
+      "amountPerDayVnd": 71314707,
+      "amountChangePct": 99.2
+    }
+  ],
+  "fieldRanges": [
+    {
+      "field": "Age at simulation start",
+      "kind": "range",
+      "min": 19,
+      "max": 75,
+      "unit": "years"
+    },
+    {
+      "field": "Monthly income",
+      "kind": "range",
+      "min": 9000000,
+      "max": 119000000,
+      "unit": "VND"
+    },
+    {
+      "field": "Credit score",
+      "kind": "range",
+      "min": 305,
+      "max": 850,
+      "unit": "points"
+    },
+    {
+      "field": "Credit history score",
+      "kind": "range",
+      "min": 300,
+      "max": 850,
+      "unit": "points"
+    },
+    {
+      "field": "Opening account balance",
+      "kind": "range",
+      "min": 2000000,
+      "max": 199000000,
+      "unit": "VND"
+    },
+    {
+      "field": "Loan request",
+      "kind": "range",
+      "min": 1000000,
+      "max": 149000000,
+      "unit": "VND"
+    },
+    {
+      "field": "Loan term",
+      "kind": "range",
+      "min": 3,
+      "max": 24,
+      "unit": "months"
+    },
+    {
+      "field": "Loan principal",
+      "kind": "range",
+      "min": 1000000,
+      "max": 149000000,
+      "unit": "VND"
+    },
+    {
+      "field": "Outstanding principal",
+      "kind": "range",
+      "min": 0,
+      "max": 149000000,
+      "unit": "VND"
+    },
+    {
+      "field": "Loan interest rate",
+      "kind": "range",
+      "min": 8.95,
+      "max": 23.34,
+      "unit": "%/year"
+    },
+    {
+      "field": "Transaction amount",
+      "kind": "range",
+      "min": 7792,
+      "max": 59000000,
+      "unit": "VND"
+    },
+    {
+      "field": "Risk score",
+      "kind": "range",
+      "min": 0.01,
+      "max": 0.91,
+      "unit": "0\u20131"
+    }
+  ],
+  "fieldHistograms": [
+    {
+      "field": "Transaction amount",
+      "min": 7792.0,
+      "max": 59000000.0,
+      "bins": [
+        {
+          "min": 7792.0,
+          "max": 7381818.0,
+          "count": 2453,
+          "months": {
+            "2025-01": 442,
+            "2025-02": 359,
+            "2025-03": 386,
+            "2025-04": 422,
+            "2025-05": 448,
+            "2025-06": 396
+          }
+        },
+        {
+          "min": 7381818.0,
+          "max": 14755844.0,
+          "count": 8,
+          "months": {
+            "2025-01": 1,
+            "2025-02": 1,
+            "2025-03": 3,
+            "2025-04": 1,
+            "2025-05": 1,
+            "2025-06": 1
+          }
+        },
+        {
+          "min": 14755844.0,
+          "max": 22129870.0,
+          "count": 5,
+          "months": {
+            "2025-01": 2,
+            "2025-02": 0,
+            "2025-03": 0,
+            "2025-04": 1,
+            "2025-05": 1,
+            "2025-06": 1
+          }
+        },
+        {
+          "min": 22129870.0,
+          "max": 29503896.0,
+          "count": 10,
+          "months": {
+            "2025-01": 3,
+            "2025-02": 2,
+            "2025-03": 1,
+            "2025-04": 2,
+            "2025-05": 1,
+            "2025-06": 1
+          }
+        },
+        {
+          "min": 29503896.0,
+          "max": 36877922.0,
+          "count": 4,
+          "months": {
+            "2025-01": 1,
+            "2025-02": 0,
+            "2025-03": 1,
+            "2025-04": 1,
+            "2025-05": 1,
+            "2025-06": 0
+          }
+        },
+        {
+          "min": 36877922.0,
+          "max": 44251948.0,
+          "count": 8,
+          "months": {
+            "2025-01": 1,
+            "2025-02": 2,
+            "2025-03": 1,
+            "2025-04": 1,
+            "2025-05": 0,
+            "2025-06": 3
+          }
+        },
+        {
+          "min": 44251948.0,
+          "max": 51625974.0,
+          "count": 4,
+          "months": {
+            "2025-01": 1,
+            "2025-02": 1,
+            "2025-03": 1,
+            "2025-04": 1,
+            "2025-05": 0,
+            "2025-06": 0
+          }
+        },
+        {
+          "min": 51625974.0,
+          "max": 59000000.0,
+          "count": 8,
+          "months": {
+            "2025-01": 0,
+            "2025-02": 2,
+            "2025-03": 1,
+            "2025-04": 1,
+            "2025-05": 3,
+            "2025-06": 1
+          }
+        }
+      ]
+    },
+    {
+      "field": "Risk score",
+      "min": 0.01,
+      "max": 0.91,
+      "bins": [
+        {
+          "min": 0.01,
+          "max": 0.1225,
+          "count": 842,
+          "months": {
+            "2025-01": 162,
+            "2025-02": 116,
+            "2025-03": 134,
+            "2025-04": 139,
+            "2025-05": 147,
+            "2025-06": 144
+          }
+        },
+        {
+          "min": 0.1225,
+          "max": 0.23500000000000001,
+          "count": 786,
+          "months": {
+            "2025-01": 130,
+            "2025-02": 120,
+            "2025-03": 117,
+            "2025-04": 151,
+            "2025-05": 147,
+            "2025-06": 121
+          }
+        },
+        {
+          "min": 0.23500000000000001,
+          "max": 0.34750000000000003,
+          "count": 809,
+          "months": {
+            "2025-01": 146,
+            "2025-02": 121,
+            "2025-03": 132,
+            "2025-04": 130,
+            "2025-05": 151,
+            "2025-06": 129
+          }
+        },
+        {
+          "min": 0.34750000000000003,
+          "max": 0.46,
+          "count": 16,
+          "months": {
+            "2025-01": 4,
+            "2025-02": 2,
+            "2025-03": 3,
+            "2025-04": 2,
+            "2025-05": 3,
+            "2025-06": 2
+          }
+        },
+        {
+          "min": 0.46,
+          "max": 0.5725,
+          "count": 0,
+          "months": {
+            "2025-01": 0,
+            "2025-02": 0,
+            "2025-03": 0,
+            "2025-04": 0,
+            "2025-05": 0,
+            "2025-06": 0
+          }
+        },
+        {
+          "min": 0.5725,
+          "max": 0.685,
+          "count": 0,
+          "months": {
+            "2025-01": 0,
+            "2025-02": 0,
+            "2025-03": 0,
+            "2025-04": 0,
+            "2025-05": 0,
+            "2025-06": 0
+          }
+        },
+        {
+          "min": 0.685,
+          "max": 0.7975,
+          "count": 0,
+          "months": {
+            "2025-01": 0,
+            "2025-02": 0,
+            "2025-03": 0,
+            "2025-04": 0,
+            "2025-05": 0,
+            "2025-06": 0
+          }
+        },
+        {
+          "min": 0.7975,
+          "max": 0.91,
+          "count": 47,
+          "months": {
+            "2025-01": 9,
+            "2025-02": 8,
+            "2025-03": 8,
+            "2025-04": 8,
+            "2025-05": 7,
+            "2025-06": 7
+          }
+        }
+      ]
+    },
+    {
+      "field": "Monthly income",
+      "min": 9000000.0,
+      "max": 119000000.0,
+      "bins": [
+        {
+          "min": 9000000.0,
+          "max": 22750000.0,
+          "count": 400,
+          "months": {
+            "2025-01": 72,
+            "2025-02": 58,
+            "2025-03": 79,
+            "2025-04": 67,
+            "2025-05": 65,
+            "2025-06": 59
+          }
+        },
+        {
+          "min": 22750000.0,
+          "max": 36500000.0,
+          "count": 325,
+          "months": {
+            "2025-01": 56,
+            "2025-02": 56,
+            "2025-03": 44,
+            "2025-04": 59,
+            "2025-05": 56,
+            "2025-06": 54
+          }
+        },
+        {
+          "min": 36500000.0,
+          "max": 50250000.0,
+          "count": 200,
+          "months": {
+            "2025-01": 36,
+            "2025-02": 30,
+            "2025-03": 29,
+            "2025-04": 37,
+            "2025-05": 43,
+            "2025-06": 25
+          }
+        },
+        {
+          "min": 50250000.0,
+          "max": 64000000.0,
+          "count": 300,
+          "months": {
+            "2025-01": 57,
+            "2025-02": 38,
+            "2025-03": 47,
+            "2025-04": 58,
+            "2025-05": 52,
+            "2025-06": 48
+          }
+        },
+        {
+          "min": 64000000.0,
+          "max": 77750000.0,
+          "count": 325,
+          "months": {
+            "2025-01": 63,
+            "2025-02": 45,
+            "2025-03": 42,
+            "2025-04": 63,
+            "2025-05": 54,
+            "2025-06": 58
+          }
+        },
+        {
+          "min": 77750000.0,
+          "max": 91500000.0,
+          "count": 350,
+          "months": {
+            "2025-01": 58,
+            "2025-02": 54,
+            "2025-03": 67,
+            "2025-04": 49,
+            "2025-05": 68,
+            "2025-06": 54
+          }
+        },
+        {
+          "min": 91500000.0,
+          "max": 105250000.0,
+          "count": 350,
+          "months": {
+            "2025-01": 71,
+            "2025-02": 49,
+            "2025-03": 47,
+            "2025-04": 53,
+            "2025-05": 65,
+            "2025-06": 65
+          }
+        },
+        {
+          "min": 105250000.0,
+          "max": 119000000.0,
+          "count": 250,
+          "months": {
+            "2025-01": 38,
+            "2025-02": 37,
+            "2025-03": 39,
+            "2025-04": 44,
+            "2025-05": 52,
+            "2025-06": 40
+          }
+        }
+      ]
+    },
+    {
+      "field": "Credit score",
+      "min": 305.0,
+      "max": 850.0,
+      "bins": [
+        {
+          "min": 305.0,
+          "max": 373.125,
+          "count": 250,
+          "months": {
+            "2025-01": 39,
+            "2025-02": 33,
+            "2025-03": 47,
+            "2025-04": 49,
+            "2025-05": 50,
+            "2025-06": 32
+          }
+        },
+        {
+          "min": 373.125,
+          "max": 441.25,
+          "count": 350,
+          "months": {
+            "2025-01": 63,
+            "2025-02": 44,
+            "2025-03": 52,
+            "2025-04": 60,
+            "2025-05": 78,
+            "2025-06": 53
+          }
+        },
+        {
+          "min": 441.25,
+          "max": 509.375,
+          "count": 450,
+          "months": {
+            "2025-01": 85,
+            "2025-02": 72,
+            "2025-03": 66,
+            "2025-04": 88,
+            "2025-05": 75,
+            "2025-06": 64
+          }
+        },
+        {
+          "min": 509.375,
+          "max": 577.5,
+          "count": 125,
+          "months": {
+            "2025-01": 20,
+            "2025-02": 17,
+            "2025-03": 19,
+            "2025-04": 18,
+            "2025-05": 29,
+            "2025-06": 22
+          }
+        },
+        {
+          "min": 577.5,
+          "max": 645.625,
+          "count": 275,
+          "months": {
+            "2025-01": 51,
+            "2025-02": 42,
+            "2025-03": 34,
+            "2025-04": 51,
+            "2025-05": 48,
+            "2025-06": 49
+          }
+        },
+        {
+          "min": 645.625,
+          "max": 713.75,
+          "count": 450,
+          "months": {
+            "2025-01": 86,
+            "2025-02": 69,
+            "2025-03": 77,
+            "2025-04": 83,
+            "2025-05": 69,
+            "2025-06": 66
+          }
+        },
+        {
+          "min": 713.75,
+          "max": 781.875,
+          "count": 300,
+          "months": {
+            "2025-01": 55,
+            "2025-02": 42,
+            "2025-03": 57,
+            "2025-04": 41,
+            "2025-05": 46,
+            "2025-06": 59
+          }
+        },
+        {
+          "min": 781.875,
+          "max": 850.0,
+          "count": 300,
+          "months": {
+            "2025-01": 52,
+            "2025-02": 48,
+            "2025-03": 42,
+            "2025-04": 40,
+            "2025-05": 60,
+            "2025-06": 58
+          }
+        }
+      ]
+    },
+    {
+      "field": "Age at simulation start",
+      "min": 19.0,
+      "max": 75.0,
+      "bins": [
+        {
+          "min": 19.0,
+          "max": 26.0,
+          "count": 325,
+          "months": {
+            "2025-01": 60,
+            "2025-02": 51,
+            "2025-03": 49,
+            "2025-04": 52,
+            "2025-05": 63,
+            "2025-06": 50
+          }
+        },
+        {
+          "min": 26.0,
+          "max": 33.0,
+          "count": 250,
+          "months": {
+            "2025-01": 43,
+            "2025-02": 49,
+            "2025-03": 35,
+            "2025-04": 43,
+            "2025-05": 45,
+            "2025-06": 35
+          }
+        },
+        {
+          "min": 33.0,
+          "max": 40.0,
+          "count": 375,
+          "months": {
+            "2025-01": 61,
+            "2025-02": 50,
+            "2025-03": 48,
+            "2025-04": 77,
+            "2025-05": 73,
+            "2025-06": 66
+          }
+        },
+        {
+          "min": 40.0,
+          "max": 47.0,
+          "count": 125,
+          "months": {
+            "2025-01": 26,
+            "2025-02": 20,
+            "2025-03": 21,
+            "2025-04": 21,
+            "2025-05": 18,
+            "2025-06": 19
+          }
+        },
+        {
+          "min": 47.0,
+          "max": 54.0,
+          "count": 375,
+          "months": {
+            "2025-01": 81,
+            "2025-02": 46,
+            "2025-03": 68,
+            "2025-04": 61,
+            "2025-05": 58,
+            "2025-06": 61
+          }
+        },
+        {
+          "min": 54.0,
+          "max": 61.0,
+          "count": 375,
+          "months": {
+            "2025-01": 62,
+            "2025-02": 58,
+            "2025-03": 54,
+            "2025-04": 72,
+            "2025-05": 60,
+            "2025-06": 69
+          }
+        },
+        {
+          "min": 61.0,
+          "max": 68.0,
+          "count": 375,
+          "months": {
+            "2025-01": 55,
+            "2025-02": 51,
+            "2025-03": 63,
+            "2025-04": 63,
+            "2025-05": 79,
+            "2025-06": 64
+          }
+        },
+        {
+          "min": 68.0,
+          "max": 75.0,
+          "count": 300,
+          "months": {
+            "2025-01": 63,
+            "2025-02": 42,
+            "2025-03": 56,
+            "2025-04": 41,
+            "2025-05": 59,
+            "2025-06": 39
+          }
+        }
+      ]
+    },
+    {
+      "field": "Opening account balance",
+      "min": 2000000.0,
+      "max": 199000000.0,
+      "bins": [
+        {
+          "min": 2000000.0,
+          "max": 26625000.0,
+          "count": 350,
+          "months": {
+            "2025-01": 61,
+            "2025-02": 50,
+            "2025-03": 55,
+            "2025-04": 59,
+            "2025-05": 75,
+            "2025-06": 50
+          }
+        },
+        {
+          "min": 26625000.0,
+          "max": 51250000.0,
+          "count": 350,
+          "months": {
+            "2025-01": 70,
+            "2025-02": 52,
+            "2025-03": 66,
+            "2025-04": 57,
+            "2025-05": 65,
+            "2025-06": 40
+          }
+        },
+        {
+          "min": 51250000.0,
+          "max": 75875000.0,
+          "count": 225,
+          "months": {
+            "2025-01": 40,
+            "2025-02": 34,
+            "2025-03": 37,
+            "2025-04": 41,
+            "2025-05": 46,
+            "2025-06": 27
+          }
+        },
+        {
+          "min": 75875000.0,
+          "max": 100500000.0,
+          "count": 375,
+          "months": {
+            "2025-01": 60,
+            "2025-02": 55,
+            "2025-03": 57,
+            "2025-04": 59,
+            "2025-05": 69,
+            "2025-06": 75
+          }
+        },
+        {
+          "min": 100500000.0,
+          "max": 125125000.0,
+          "count": 250,
+          "months": {
+            "2025-01": 44,
+            "2025-02": 31,
+            "2025-03": 49,
+            "2025-04": 48,
+            "2025-05": 39,
+            "2025-06": 39
+          }
+        },
+        {
+          "min": 125125000.0,
+          "max": 149750000.0,
+          "count": 175,
+          "months": {
+            "2025-01": 18,
+            "2025-02": 20,
+            "2025-03": 32,
+            "2025-04": 25,
+            "2025-05": 48,
+            "2025-06": 32
+          }
+        },
+        {
+          "min": 149750000.0,
+          "max": 174375000.0,
+          "count": 475,
+          "months": {
+            "2025-01": 99,
+            "2025-02": 78,
+            "2025-03": 59,
+            "2025-04": 91,
+            "2025-05": 65,
+            "2025-06": 83
+          }
+        },
+        {
+          "min": 174375000.0,
+          "max": 199000000.0,
+          "count": 300,
+          "months": {
+            "2025-01": 59,
+            "2025-02": 47,
+            "2025-03": 39,
+            "2025-04": 50,
+            "2025-05": 48,
+            "2025-06": 57
+          }
+        }
+      ]
+    }
+  ],
+  "categories": [
+    {
+      "name": "Transaction type",
+      "values": [
+        {
+          "label": "TRANSFER",
+          "count": 846
+        },
+        {
+          "label": "PAYMENT",
+          "count": 575
+        },
+        {
+          "label": "CASH_OUT",
+          "count": 489
+        },
+        {
+          "label": "CASH_IN",
+          "count": 384
+        },
+        {
+          "label": "DEBIT",
+          "count": 206
+        }
+      ]
+    },
+    {
+      "name": "Transaction status",
+      "values": [
+        {
+          "label": "success",
+          "count": 2479
+        },
+        {
+          "label": "failed",
+          "count": 21
+        }
+      ]
+    },
+    {
+      "name": "Transaction channel",
+      "values": [
+        {
+          "label": "web",
+          "count": 858
+        },
+        {
+          "label": "branch",
+          "count": 825
+        },
+        {
+          "label": "mobile",
+          "count": 817
+        }
+      ]
+    },
+    {
+      "name": "Province",
+      "values": [
+        {
+          "label": "HCMC",
+          "count": 20
+        },
+        {
+          "label": "DANANG",
+          "count": 19
+        },
+        {
+          "label": "HAIPHONG",
+          "count": 18
+        },
+        {
+          "label": "HANOI",
+          "count": 17
+        },
+        {
+          "label": "QUANGNINH",
+          "count": 14
+        },
+        {
+          "label": "CANTHO",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "name": "Occupation",
+      "values": [
+        {
+          "label": "public_sector",
+          "count": 23
+        },
+        {
+          "label": "small_business",
+          "count": 18
+        },
+        {
+          "label": "employee",
+          "count": 16
+        },
+        {
+          "label": "student",
+          "count": 16
+        },
+        {
+          "label": "self_employed",
+          "count": 15
+        },
+        {
+          "label": "retired",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "name": "Age band",
+      "values": [
+        {
+          "label": "60+",
+          "count": 30
+        },
+        {
+          "label": "45-59",
+          "count": 27
+        },
+        {
+          "label": "25-34",
+          "count": 19
+        },
+        {
+          "label": "35-44",
+          "count": 14
+        },
+        {
+          "label": "18-24",
+          "count": 10
+        }
+      ]
+    },
+    {
+      "name": "Credit payment status",
+      "values": [
+        {
+          "label": "on_time",
+          "count": 528
+        },
+        {
+          "label": "late_30",
+          "count": 37
+        },
+        {
+          "label": "late_60",
+          "count": 24
+        },
+        {
+          "label": "late_90",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "name": "Loan package",
+      "values": [
+        {
+          "label": "PERSONAL_12",
+          "count": 1
+        },
+        {
+          "label": "PERSONAL_24",
+          "count": 1
+        },
+        {
+          "label": "MICRO_6",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "Loan application status",
+      "values": [
+        {
+          "label": "rejected",
+          "count": 62
+        },
+        {
+          "label": "approved",
+          "count": 38
+        }
+      ]
+    },
+    {
+      "name": "Loan status",
+      "values": [
+        {
+          "label": "active",
+          "count": 27
+        },
+        {
+          "label": "closed",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "name": "Calendar tags",
+      "values": [
+        {
+          "label": "regular",
+          "count": 1447
+        },
+        {
+          "label": "payday",
+          "count": 569
+        },
+        {
+          "label": "month_end",
+          "count": 286
+        },
+        {
+          "label": "tet_period",
+          "count": 184
+        },
+        {
+          "label": "holiday_bridge",
+          "count": 48
+        },
+        {
+          "label": "campaign_0505",
+          "count": 43
+        },
+        {
+          "label": "campaign_0202",
+          "count": 34
+        },
+        {
+          "label": "new_year",
+          "count": 30
+        },
+        {
+          "label": "campaign_0101",
+          "count": 30
+        },
+        {
+          "label": "campaign_0606",
+          "count": 27
+        },
+        {
+          "label": "reunification_day",
+          "count": 23
+        },
+        {
+          "label": "campaign_0303",
+          "count": 21
+        },
+        {
+          "label": "family_day",
+          "count": 19
+        },
+        {
+          "label": "labor_day",
+          "count": 18
+        },
+        {
+          "label": "campaign_0404",
+          "count": 15
+        },
+        {
+          "label": "hung_kings",
+          "count": 14
+        }
+      ]
+    }
+  ]
+}
