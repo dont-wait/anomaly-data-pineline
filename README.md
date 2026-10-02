@@ -50,11 +50,12 @@ make pipeline SEED=42 CUSTOMERS=1000 OUTPUT=data/run-42 REPORT_DIR=reports/run-4
 ```
 
 `make pipeline` nhận cùng các Make variables và truyền chúng cho cả hai bước generate/report.
+Có thể chọn pipeline stage TOML khác bằng `PIPELINE=configs/pipeline.toml`.
 
 Lệnh CLI tương đương:
 
 ```bash
-uv run anomaly-data generate-data --config configs/base.yaml --seed 42 --customers 1000 --output data/run-42
+uv run anomaly-data generate-data --config configs/base.yaml --pipeline configs/pipeline.toml --seed 42 --customers 1000 --output data/run-42
 uv run anomaly-data report --data data/run-42 --output reports/run-42
 ```
 
@@ -116,9 +117,18 @@ src/anomaly_data_pipeline/
 ├── domain/models.py        # Customer, Account, Transaction, Event
 ├── generation/
 │   ├── calendar.py         # Lịch lễ/campaign và trọng số chọn ngày
-│   └── pipeline.py         # Sinh entity, scenario và chronological event stream
+│   ├── pipeline.py         # Khởi tạo context, load và chạy stages theo TOML
+│   └── stages/             # Một module cho mỗi phần xử lý pipeline
+│       ├── reference_data.py
+│       ├── customer_accounts.py
+│       ├── credit_history.py
+│       ├── loan_lifecycle.py
+│       ├── transactions.py
+│       └── event_ordering.py
 └── analysis.py             # Range fields, monthly traffic và ngày đặc biệt
 ```
+
+`configs/pipeline.toml` quyết định thứ tự chạy stage, module xử lý, file output và options nghiệp vụ như gói vay, loại giao dịch, kênh, ngưỡng duyệt vay. Mỗi stage export `run(context, options)`; thêm bước bằng module riêng rồi khai báo entry `[[stages]]` trong TOML. Stage tạo dữ liệu cần đặt trước stage sử dụng dữ liệu đó. `configs/base.yaml` vẫn chứa tham số run như seed, số khách hàng, số ngày và anomaly rate. Chọn file khác bằng `make pipeline PIPELINE=configs/my-pipeline.toml`.
 
 `flake.nix` cung cấp Python 3.13, Node.js 22, `uv` và `make`; `flake.lock` khóa phiên bản Nixpkgs. `uv.lock` và `client/package-lock.json` khóa dependency Python/JavaScript. Mimesis locale EN tạo tên/email/địa chỉ nền; province, nghề nghiệp, tuổi, thu nhập và quy tắc nghiệp vụ dùng vocabularies của generator nên chưa đại diện cho phân phối nhân khẩu Việt Nam thực tế.
 

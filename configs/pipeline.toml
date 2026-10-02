@@ -1,0 +1,68 @@
+version = 1
+outputs = ["customers", "accounts", "loan_packages", "loan_applications", "loans", "transactions", "labels"]
+
+[runtime]
+locale = "EN"
+
+[manifest]
+schema_version = 1
+notes = [
+  "Synthetic data; not real people or bank records.",
+  "PaySim-inspired behavior profile; no PaySim labels are exposed to detector events.",
+  "Ground-truth labels are written to labels.jsonl for offline evaluation."
+]
+
+# Ordered stages. Each stage can be enabled or disabled without editing the runner.
+[[stages]]
+name = "reference_data"
+module = "anomaly_data_pipeline.generation.stages.reference_data"
+enabled = true
+
+[[stages.options.packages]]
+code = "PERSONAL_12"
+name = "Personal 12-month"
+min_amount = 5000000
+max_amount = 300000000
+term_options = [12]
+
+[[stages.options.packages]]
+code = "PERSONAL_24"
+name = "Personal 24-month"
+min_amount = 10000000
+max_amount = 500000000
+term_options = [12, 24]
+
+[[stages.options.packages]]
+code = "MICRO_6"
+name = "Micro 6-month"
+min_amount = 1000000
+max_amount = 50000000
+term_options = [3, 6]
+
+[[stages]]
+name = "customer_accounts"
+module = "anomaly_data_pipeline.generation.stages.customer_accounts"
+enabled = true
+options = { provinces = ["HANOI", "HCMC", "DANANG", "CANTHO", "HAIPHONG", "QUANGNINH"], occupations = ["employee", "small_business", "self_employed", "public_sector", "student", "retired"] }
+
+[[stages]]
+name = "credit_history"
+module = "anomaly_data_pipeline.generation.stages.credit_history"
+enabled = true
+
+[[stages]]
+name = "loan_lifecycle"
+module = "anomaly_data_pipeline.generation.stages.loan_lifecycle"
+enabled = true
+options = { approval_bad_debt = 0.08, approval_high_credit = 0.68, approval_medium_credit = 0.42, approval_low_credit = 0.18, high_credit_threshold = 700, medium_credit_threshold = 600, active_probability = 0.65, interest_rate_min = 0.08, interest_rate_max = 0.24 }
+
+[[stages]]
+name = "transactions"
+module = "anomaly_data_pipeline.generation.stages.transactions"
+enabled = true
+options = { types = ["TRANSFER", "CASH_OUT", "PAYMENT", "CASH_IN", "DEBIT"], type_weights = [35, 20, 25, 12, 8], channels = ["mobile", "web", "branch"], anomaly_type = "CASH_OUT", anomaly_min_amount = 8000000, anomaly_max_amount = 60000000, normal_min_amount = 20000, normal_max_amount = 5000000, holiday_tags = ["new_year", "tet_period", "hung_kings", "reunification_day", "labor_day", "holiday_bridge", "family_day"] }
+
+[[stages]]
+name = "event_ordering"
+module = "anomaly_data_pipeline.generation.stages.event_ordering"
+enabled = true

@@ -1,6 +1,7 @@
 SHELL := /bin/sh
 
 CONFIG ?= configs/base.yaml
+PIPELINE ?= configs/pipeline.toml
 OUTPUT ?= data/generated
 REPORT_DIR ?= reports
 SEED ?=
@@ -17,8 +18,8 @@ setup: ## Resolve and install locked Python dependencies with Nix and uv
 shell: ## Enter the Nix development shell
 	nix develop
 
-generate: ## Generate JSONL entities and chronological events (CONFIG, OUTPUT, SEED, CUSTOMERS overridable)
-	uv run anomaly-data generate-data --config "$(CONFIG)" $(if $(SEED),--seed $(SEED)) $(if $(CUSTOMERS),--customers $(CUSTOMERS)) --output "$(OUTPUT)"
+generate: ## Generate JSONL entities and chronological events (CONFIG, PIPELINE, OUTPUT, SEED, CUSTOMERS overridable)
+	uv run anomaly-data generate-data --config "$(CONFIG)" --pipeline "$(PIPELINE)" $(if $(SEED),--seed $(SEED)) $(if $(CUSTOMERS),--customers $(CUSTOMERS)) --output "$(OUTPUT)"
 
 report: ## Analyze generated data into Markdown and CSV (OUTPUT, REPORT_DIR overridable)
 	uv run anomaly-data report --data "$(OUTPUT)" --output "$(REPORT_DIR)"

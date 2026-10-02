@@ -1,6 +1,24 @@
 from pathlib import Path
+import tomllib
 import yaml
 from pydantic import BaseModel, Field
+
+
+DEFAULT_PIPELINE_CONFIG = Path("configs/pipeline.toml")
+
+
+def load_pipeline_config(path: Path = DEFAULT_PIPELINE_CONFIG) -> dict[str, object]:
+    with path.open("rb") as stream:
+        raw = tomllib.load(stream)
+    stages = raw.get("stages", [])
+    if not stages or any(not stage.get("name") or not stage.get("module") for stage in stages):
+        raise ValueError(f"Invalid pipeline stage configuration in {path}")
+    names = [stage["name"] for stage in stages]
+    if len(names) != len(set(names)):
+        raise ValueError(f"Pipeline stage names must be unique in {path}")
+    if not raw.get("outputs"):
+        raise ValueError(f"Pipeline outputs must be configured in {path}")
+    return raw
 
 
 class GenerationConfig(BaseModel):

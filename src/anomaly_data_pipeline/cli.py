@@ -2,7 +2,7 @@ from pathlib import Path
 
 import typer
 
-from anomaly_data_pipeline.config import GenerationConfig, load_config
+from anomaly_data_pipeline.config import DEFAULT_PIPELINE_CONFIG, GenerationConfig, load_config, load_pipeline_config
 from anomaly_data_pipeline.analysis import analyze
 from anomaly_data_pipeline.generation.pipeline import generate
 
@@ -12,6 +12,7 @@ app = typer.Typer(help="Generate deterministic synthetic AnomalyBank data and ev
 @app.command()
 def generate_data(
     config: Path = typer.Option(Path("configs/base.yaml"), "--config", "-c", help="YAML generation config."),
+    pipeline: Path = typer.Option(DEFAULT_PIPELINE_CONFIG, "--pipeline", help="TOML pipeline stages."),
     output: Path | None = typer.Option(None, "--output", "-o", help="Override output directory."),
     seed: int | None = typer.Option(None, "--seed", help="Override configured seed."),
     customers: int | None = typer.Option(None, "--customers", min=1, help="Override customer count."),
@@ -26,7 +27,7 @@ def generate_data(
     if customers is not None:
         values["customers"] = customers
     settings = GenerationConfig.model_validate(values)
-    result = generate(settings, Path(settings.output_dir))
+    result = generate(settings, Path(settings.output_dir), load_pipeline_config(pipeline))
     typer.echo(f"Generated {result['customers']} customers, {result['accounts']} accounts, "
                f"{result['transactions']} transactions and {result['events']} events in {settings.output_dir}")
 
