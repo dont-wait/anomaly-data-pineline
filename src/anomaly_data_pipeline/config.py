@@ -1,5 +1,4 @@
 from pathlib import Path
-
 import yaml
 from pydantic import BaseModel, Field
 
@@ -13,9 +12,10 @@ class GenerationConfig(BaseModel):
     days: int = Field(default=180, ge=1)
     output_dir: str = "data/generated"
     source_profile: str = "paysim-inspired"
+    calendar_profile: str = "vietnam-2025-demo"
+    campaign_days: dict[str, float] = Field(default_factory=dict)
 
 
 def load_config(path: Path) -> GenerationConfig:
     raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     return GenerationConfig.model_validate(raw)
-

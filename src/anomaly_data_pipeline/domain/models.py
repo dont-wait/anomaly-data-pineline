@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from decimal import Decimal
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -29,7 +28,7 @@ class Account(Record):
     customer_id: str
     type: str
     currency: str = "VND"
-    balance: dict[str, Decimal]
+    balance: dict[str, int]
     status: str
     version: int
     created_at: datetime
@@ -39,12 +38,13 @@ class Transaction(Record):
     transaction_id: str
     source: dict[str, Any]
     destination: dict[str, Any]
-    amount: Decimal
+    amount: int
     currency: str = "VND"
     type: str
     channel: str
     status: str
     risk: dict[str, Any]
+    calendar_context: dict[str, Any]
     idempotency_key: str
     created_at: datetime
     posted_at: datetime
@@ -61,4 +61,3 @@ class Event(Record):
     payload: dict[str, Any]
     # Ground-truth labels are an evaluation sidecar, never sent to detector input.
     labels: dict[str, Any] | None = None
-

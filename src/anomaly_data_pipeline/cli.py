@@ -3,6 +3,7 @@ from pathlib import Path
 import typer
 
 from anomaly_data_pipeline.config import GenerationConfig, load_config
+from anomaly_data_pipeline.analysis import analyze
 from anomaly_data_pipeline.generation.pipeline import generate
 
 app = typer.Typer(help="Generate deterministic synthetic AnomalyBank data and events.")
@@ -30,6 +31,15 @@ def generate_data(
                f"{result['transactions']} transactions and {result['events']} events in {settings.output_dir}")
 
 
+@app.command()
+def report(
+    data: Path = typer.Option(Path("data/generated"), "--data", help="Directory containing generated JSONL."),
+    output: Path = typer.Option(Path("reports"), "--output", "-o", help="Directory for Markdown and CSV analysis."),
+) -> None:
+    """Summarize field ranges and monthly/calendar transaction traffic."""
+    analyze(data, output)
+    typer.echo(f"Wrote {output / 'dataset-analysis.md'} and {output / 'monthly-traffic.csv'}")
+
+
 if __name__ == "__main__":
     app()
-
