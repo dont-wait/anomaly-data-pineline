@@ -1,11 +1,11 @@
 version = 1
-outputs = ["customers", "accounts", "loan_packages", "loan_applications", "loans", "transactions", "labels"]
+outputs = ["customers", "accounts", "loan_packages", "loan_applications", "loans", "transactions", "labels", "counterparties", "transfer_events"]
 
 [runtime]
 locale = "EN"
 
 [manifest]
-schema_version = 1
+schema_version = 2
 notes = [
   "Synthetic data; not real people or bank records.",
   "PaySim-inspired behavior profile; no PaySim labels are exposed to detector events.",
@@ -60,7 +60,7 @@ options = { approval_bad_debt = 0.08, approval_high_credit = 0.68, approval_medi
 name = "transactions"
 module = "anomaly_data_pipeline.generation.stages.transactions"
 enabled = true
-options = { types = ["TRANSFER", "CASH_OUT", "PAYMENT", "CASH_IN", "DEBIT"], type_weights = [35, 20, 25, 12, 8], channels = ["mobile", "web", "branch"], anomaly_type = "CASH_OUT", anomaly_min_amount = 8000000, anomaly_max_amount = 60000000, normal_min_amount = 20000, normal_max_amount = 5000000, holiday_tags = ["new_year", "tet_period", "hung_kings", "reunification_day", "labor_day", "holiday_bridge", "family_day"] }
+options = { types = ["TRANSFER", "CASH_OUT", "PAYMENT", "CASH_IN", "DEBIT"], type_weights = [35, 20, 25, 12, 8], channels = ["mobile", "web", "desktop"], fee = 0, merchant_count = 10, cash_counterparty_count = 3, preferred_receivers = 5, repeat_receiver_probability = 0.8, typical_amount_min = 50000, typical_amount_max = 2000000, normal_multipliers = [0.2, 3.0], outlier_multipliers = [4.0, 12.0], normal_large_probability = 0.05, holiday_tags = ["new_year", "tet_period", "hung_kings", "reunification_day", "labor_day", "holiday_bridge", "family_day"] }
 
 [[stages]]
 name = "event_ordering"

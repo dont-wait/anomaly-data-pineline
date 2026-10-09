@@ -43,11 +43,11 @@ class Transaction(Record):
     type: str
     channel: str
     status: str
-    risk: dict[str, Any]
+    fee: int = 0
     calendar_context: dict[str, Any]
     idempotency_key: str
     created_at: datetime
-    posted_at: datetime
+    posted_at: datetime | None = None
 
 
 class Event(Record):
@@ -55,7 +55,7 @@ class Event(Record):
     aggregate_type: str
     aggregate_id: str
     event_type: str
-    schema_version: int = 1
+    schema_version: int = 2
     occurred_at: datetime
     sequence: int
     payload: dict[str, Any]

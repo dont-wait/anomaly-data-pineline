@@ -89,12 +89,14 @@ Mặc định generator tạo:
 | `loan_packages.jsonl` | Danh mục gói vay |
 | `loan_applications.jsonl` | Yêu cầu vay, kỳ hạn, đánh giá và trạng thái |
 | `loans.jsonl` | Khoản vay được duyệt, dư nợ, lãi suất, kỳ hạn |
-| `transactions.jsonl` | Giao dịch với thời gian, loại, kênh, số tiền, risk và calendar context |
+| `transactions.jsonl` | Snapshot kết quả giao dịch với thời gian, loại, kênh, số tiền, fee và calendar context |
+| `counterparties.jsonl` | Merchant và điểm cash dùng chung, làm node ngoài account |
+| `transfer_events.jsonl` | Lifecycle transfer theo contract camelCase của Anomaly, schema version 1 |
 | `events.jsonl` | Event bất biến, đã sắp theo `occurred_at` để replay |
 | `labels.jsonl` | Ground-truth labels dành cho đánh giá offline |
 | `manifest.json` | Seed, kỳ mô phỏng, nguồn profile và số dòng mỗi file |
 
-Không đưa ground-truth label vào event payload đầu vào detector. Giao dịch cash-out bất thường vượt số dư được ghi trạng thái `failed` và phát event từ chối; các giao dịch này vẫn nằm trong tập để đánh giá phát hiện hành vi đáng ngờ.
+Không đưa ground-truth label vào event payload đầu vào detector. Giao dịch ghi nợ vượt số dư được ghi trạng thái `failed`, bất kể nhãn anomaly. Các yêu cầu này vẫn nằm trong tập để đánh giá. `posted_at` là null nếu thất bại; `risk` không được sinh sẵn.
 
 ## Báo cáo
 
@@ -134,4 +136,32 @@ src/anomaly_data_pipeline/
 
 ## Phạm vi hiện tại
 
-PaySim là nguồn tham khảo profile giao dịch, không được tải hay nhập trực tiếp. Generator hiện tạo kịch bản amount-outlier; chưa có velocity, account takeover, structuring hay bất thường dựa trên lịch trả nợ. Output là JSONL phục vụ phát triển và phân tích, chưa có MongoDB sink hoặc consumer replay nối vào detector.
+PaySim là nguồn tham khảo profile giao dịch, không được tải hay nhập trực tiếp. Generator hiện tạo kịch bản amount-outlier theo mức giao dịch thường của từng khách hàng, có giao dịch lớn hợp lệ chồng lấn; chưa có velocity, account takeover, structuring hay bất thường dựa trên lịch trả nợ. Output là JSONL phục vụ phát triển và phân tích, chưa có MongoDB sink hoặc consumer replay nối vào detector.
+
+## Dữ liệu train và event lifecycle (dataset schema 2)
+
+Thời điểm chấm điểm được chọn là yêu cầu giao dịch, trước khi cập nhật số dư.
+
+- Transfer: `TransferCreated` (sequence 1, `awaiting_otp`) → `TransferCompleted` (`success`) hoặc `TransferCancelled` (`cancelled`) (sequence 2).
+- Nghiệp vụ khác: `TransactionRequested` (sequence 1, `requested`) → `TransactionPosted` (`success`) hoặc `TransactionRejected` (`failed`) (sequence 2).
+- Sequence tăng trong từng transaction aggregate. Label `event_id` trỏ vào event yêu cầu; một transaction có một label dù có hai lifecycle events.
+- `events.jsonl` giữ envelope snake_case chung cho các domain. Payload giao dịch dùng các field camelCase của Anomaly; nghiệp vụ ngoài transfer có thêm `transactionType`.
+- `transfer_events.jsonl` chỉ chứa transfer, dùng đúng envelope `eventId`, `transactionId`, `eventType`, `schemaVersion`, `sequence`, `occurredAt`, `payload` của Anomaly. Event ID dùng UUID SHA1 namespace OID theo `transactionId:eventType`, giống backend.
+- Request payload chỉ gồm source/destination, amount, fee, currency, channel và trạng thái yêu cầu. Balance trước/sau nằm ở event kết quả; không có risk, nhãn hay snapshot kết quả trong request.
+
+Loader train lấy giao dịch cần chấm từ event yêu cầu, join label bằng transaction ID; không dùng snapshot kết quả trong `transactions.jsonl` làm feature trực tiếp. Không đưa `scenario_id`, status kết quả hoặc balance sau giao dịch vào model. Tách dữ liệu theo thời gian; chỉ cập nhật lịch sử/graph khi event tương ứng đã xảy ra.
+
+Mọi thời điểm giao dịch được chọn trước và xử lý theo thứ tự thời gian toàn cục. Transfer thành công trừ amount + fee ở nguồn và cộng amount vào đích; thất bại không đổi số dư. Account snapshot giữ số dư đầu kỳ. Cash-in tăng số dư nguồn; cash-out/payment/debit giảm số dư nguồn và dùng node đối tác chung. Chuyển khoản chọn account đã tồn tại, ưu tiên nhóm người nhận quen; cần ít nhất hai account nếu bật TRANSFER. Các nhóm node ngoài account được ghi vào `counterparties.jsonl`.
+
+Thông số người nhận, merchant/cash pool, fee, mức amount điển hình, multiplier và xác suất giao dịch lớn hợp lệ ở options của stage transactions trong TOML. Ground truth vẫn là kịch bản tổng hợp có kiểm soát, không chứng minh gian lận thực tế. Anomaly amount-outlier có thể xuất hiện ở nhiều loại giao dịch, không gắn cố định với CASH_OUT.
+
+Đây là lifecycle tối thiểu: chưa sinh OTP resend/expiry (`TransferOTPUpdated`), chưa mô phỏng độ trễ xử lý (request và kết quả cùng timestamp, phân biệt bằng sequence), chưa nối balance của loan events vào ledger giao dịch. ID account tổng hợp cần mapping khi nhập vào tài khoản thật của Anomaly; contract tương thích không đồng nghĩa đã replay thành công vào backend.
+
+Kiểm tra hồi quy không cần cài pytest:
+
+```bash
+nix develop
+.venv/bin/python -m unittest discover -s tests -v
+```
+
+Bộ kiểm tra xác nhận replay balance toàn cục, contract transfer, label join, người nhận dùng chung, amount chồng lấn, kết quả tái lập theo seed và report chạy với schema mới. Dữ liệu/report cũ không tự được chuyển đổi; chạy lại `make pipeline` để tạo schema 2 và cập nhật dashboard.

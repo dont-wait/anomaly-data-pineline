@@ -131,7 +131,6 @@ def _dashboard_payload(customers: list[dict[str, Any]], accounts: list[dict[str,
     add_range("Outstanding principal", [r["outstanding_principal"] for r in loans], "VND")
     add_range("Loan interest rate", [r["interest_rate"] * 100 for r in loans], "%/year")
     add_range("Transaction amount", [int(r["amount"]) for r in transactions], "VND")
-    add_range("Risk score", [float(r["risk"]["score"]) for r in transactions], "0–1")
 
     customer_by_id = {row["_id"]: row for row in customers}
     account_by_id = {row["_id"]: row for row in accounts}
@@ -142,7 +141,6 @@ def _dashboard_payload(customers: list[dict[str, Any]], accounts: list[dict[str,
         account = account_by_id.get(tx.get("source", {}).get("account_id"))
         values: dict[str, float] = {
             "Transaction amount": float(tx["amount"]),
-            "Risk score": float(tx["risk"]["score"]),
         }
         if customer:
             values.update({
@@ -248,7 +246,6 @@ def _field_ranges(customers: list[dict[str, Any]], accounts: list[dict[str, Any]
         ("loans.interest_rate", [r["interest_rate"] for r in loans]),
         ("loans.term_months", [r["term_months"] for r in loans]),
         ("transactions.amount", [int(r["amount"]) for r in transactions]),
-        ("transactions.risk.score", [r["risk"]["score"] for r in transactions]),
     ]
     result = []
     for name, values in numeric:

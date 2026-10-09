@@ -19,38 +19,25 @@ def anomaly(r: Row): return r.rng.random() < r.ctx.config.anomaly_rate
 
 @TRANSACTION.field("tx_type", scratch=True)
 def tx_type(r: Row):
-    if r.scratch["anomaly"]:
-        return r.opts["anomaly_type"]
-    if r.scratch["balance"] == 0:
-        return "CASH_IN"
     return r.rng.choices(r.opts["types"], weights=r.opts["type_weights"])[0]
-
-@TRANSACTION.field("day", scratch=True)
-def day(r: Row): return r.rng.choices(r.ctx.simulation_days, weights=r.ctx.date_weights, k=1)[0]
-
-@TRANSACTION.field("occurred", scratch=True)
-def occurred(r: Row):
-    selected_day = r.scratch["day"][0]
-    return (datetime.combine(selected_day, datetime.min.time(), tzinfo=r.start.tzinfo)
-            + timedelta(seconds=r.rng.randrange(86400)))
 
 @TRANSACTION.field("raw_amount", scratch=True)
 def raw_amount(r: Row):
-    o, balance = r.opts, r.scratch["balance"]
-    if r.scratch["anomaly"]:
-        return r.rng.randrange(o["anomaly_min_amount"] // 1_000_000, o["anomaly_max_amount"] // 1_000_000) * 1_000_000
-    amount = r.rng.randrange(o["normal_min_amount"], o["normal_max_amount"])
-    return amount if r.scratch["tx_type"] == "CASH_IN" else min(amount, balance)
+    # Customer-relative outliers overlap legitimate large purchases.
+    high = r.scratch["anomaly"] or r.rng.random() < r.opts["normal_large_probability"]
+    bounds = r.opts["outlier_multipliers"] if high else r.opts["normal_multipliers"]
+    return max(1, round(r.scratch["typical_amount"] * r.rng.uniform(*bounds)))
 
 @TRANSACTION.field("tx_status", scratch=True)
-def tx_status(r: Row): return "failed" if r.scratch["anomaly"] and r.scratch["raw_amount"] > r.scratch["balance"] else "success"
+def tx_status(r: Row):
+    return "failed" if r.scratch["tx_type"] != "CASH_IN" and r.scratch["raw_amount"] + r.opts["fee"] > r.scratch["balance"] else "success"
 
 @TRANSACTION.field("balance_after", scratch=True)
 def balance_after(r: Row):
-    balance, amount = r.scratch["balance"], int(r.scratch["raw_amount"])
+    balance, amount = r.scratch["balance"], r.scratch["raw_amount"]
     if r.scratch["tx_status"] == "failed":
         return balance
-    return balance + amount if r.scratch["tx_type"] == "CASH_IN" else balance - amount
+    return balance + amount if r.scratch["tx_type"] == "CASH_IN" else balance - amount - r.opts["fee"]
 
 
 # --- emitted document ---------------------------------------------------------
@@ -64,10 +51,10 @@ def source_account(r: Row): return r.scratch["account"]["_id"]
 def source_customer(r: Row): return r.scratch["customer"]["_id"]
 
 @TRANSACTION.field("destination.type")
-def destination_type(r: Row): return "merchant" if r.scratch["tx_type"] == "PAYMENT" else "account"
+def destination_type(r: Row): return r.scratch["destination_type"]
 
 @TRANSACTION.field("destination.account_id")
-def destination_account(r: Row): return stable_id(r.seed, "merchant-or-account", _key(r))
+def destination_account(r: Row): return r.scratch["destination_id"]
 
 @TRANSACTION.field("amount")
 def amount(r: Row): return r.scratch["raw_amount"]
@@ -81,11 +68,8 @@ def channel(r: Row): return r.rng.choice(r.opts["channels"])
 @TRANSACTION.field("status")
 def status(r: Row): return r.scratch["tx_status"]
 
-@TRANSACTION.field("risk.score")
-def risk_score(r: Row): return 0.91 if r.scratch["anomaly"] else round(r.rng.uniform(0.01, 0.35), 3)
-
-@TRANSACTION.field("risk.decision")
-def risk_decision(r: Row): return "review" if r.scratch["anomaly"] else "allow"
+@TRANSACTION.field("fee")
+def fee(r: Row): return 0 if r.scratch["tx_type"] == "CASH_IN" else r.opts["fee"]
 
 @TRANSACTION.field("calendar_context.tags")
 def tags(r: Row): return r.scratch["day"][1]
@@ -103,4 +87,4 @@ def idempotency_key(r: Row): return stable_id(r.seed, "idempotency", _key(r))
 def created_at(r: Row): return r.scratch["occurred"]
 
 @TRANSACTION.field("posted_at")
-def posted_at(r: Row): return r.scratch["occurred"]
+def posted_at(r: Row): return r.scratch["occurred"] if r.scratch["tx_status"] == "success" else None
