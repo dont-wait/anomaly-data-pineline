@@ -1,5 +1,5 @@
 version = 1
-outputs = ["customers", "accounts", "loan_packages", "loan_applications", "loans", "transactions", "labels", "counterparties", "transfer_events"]
+outputs = ["customers", "accounts", "loan_packages", "loan_applications", "loans", "transactions", "labels", "counterparties", "transfer_events", "behavior_profiles"]
 
 [runtime]
 locale = "EN"
@@ -7,7 +7,7 @@ locale = "EN"
 [manifest]
 schema_version = 2
 notes = [
-  "Synthetic data; not real people or bank records.",
+  "Synthetic contextual scenarios v4; not real people or bank records.",
   "PaySim-inspired behavior profile; no PaySim labels are exposed to detector events.",
   "Ground-truth labels are written to labels.jsonl for offline evaluation."
 ]
@@ -60,7 +60,43 @@ options = { approval_bad_debt = 0.08, approval_high_credit = 0.68, approval_medi
 name = "transactions"
 module = "anomaly_data_pipeline.generation.stages.transactions"
 enabled = true
-options = { types = ["TRANSFER", "CASH_OUT", "PAYMENT", "CASH_IN", "DEBIT"], type_weights = [35, 20, 25, 12, 8], channels = ["mobile", "web", "desktop"], fee = 0, merchant_count = 10, cash_counterparty_count = 3, preferred_receivers = 5, repeat_receiver_probability = 0.8, typical_amount_min = 50000, typical_amount_max = 2000000, normal_multipliers = [0.2, 3.0], outlier_multipliers = [4.0, 12.0], normal_large_probability = 0.05, holiday_tags = ["new_year", "tet_period", "hung_kings", "reunification_day", "labor_day", "holiday_bridge", "family_day"] }
+[stages.options]
+types = ["TRANSFER", "CASH_OUT", "PAYMENT", "CASH_IN", "DEBIT"]
+type_weights = [30, 12, 28, 20, 10]
+channels = ["mobile", "web", "desktop"]
+channel_weights = [65, 25, 10]
+fee = 0
+merchant_count = 30
+cash_counterparty_count = 10
+preferred_receivers = 5
+repeat_receiver_probability = 0.92
+preferred_channel_probability = 0.90
+activity_sigma = 0.65
+activity_min = 0.2
+activity_max = 3.5
+hour_profiles = [[7,8,9,10,11,12,13,14,15,16,17,18,19,20,21], [14,15,16,17,18,19,20,21,22,23], [5,6,7,8,9,10,11,12,13,14,15,16]]
+# Both classes can occur inside and outside customer preferred hours.
+off_hours_probability = 0.05
+anomaly_off_hours_probability = 0.35
+paydays = [1,5,10,15,20,25]
+spending_fraction = 0.6
+typical_amount_floor = 20000
+normal_multipliers = [0.3, 1.8]
+cash_in_multipliers = [0.3, 1.2]
+legitimate_large_multipliers = [3.0, 8.0]
+outlier_multipliers = [3.0, 8.0]
+normal_large_probability = 0.03
+# contextual amount / velocity / graph; labels never enter emitted payloads.
+scenario_weights = [0.4, 0.3, 0.3]
+burst_size = 6
+burst_warmup_requests = 2
+burst_gap_seconds = 15
+fan_in_sources = 7
+fan_in_warmup_sources = 3
+graph_gap_seconds = 20
+forward_fraction = 0.6
+holiday_tags = ["new_year", "tet_period", "hung_kings", "reunification_day", "labor_day", "holiday_bridge", "family_day"]
+
 
 [[stages]]
 name = "event_ordering"

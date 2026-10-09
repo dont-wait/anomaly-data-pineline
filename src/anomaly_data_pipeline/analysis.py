@@ -86,7 +86,7 @@ def analyze(data_dir: Path, report_dir: Path) -> None:
               "", "| Calendar tag | Dates | Transactions/date | Count vs regular | Amount/day (VND) | Amount vs regular |", "|---|---:|---:|---:|---:|---:|"]
     lines.extend("| " + " | ".join(map(str, row)) + " |" for row in class_rows)
     lines += ["", "## Interpretation notes", "",
-              "- Exactly configured transactions per customer are distributed over dates using synthetic calendar weights; month-to-month count changes therefore come from calendar-day weighting and month length, not population growth.",
+              "- Configured total transactions are allocated by customer activity profiles and distributed over weighted calendar dates; counts per account differ. Recurring income is included in the transaction budget, not an invisible balance top-up.",
               "- Campaign dates include repeating 5/5, 6/6 and selected double-date sales. Holiday dates use the fixed 2025 Vietnam calendar profile.",
               "- The comparison is descriptive of this generated seed and these assumptions. It is not an empirical estimate of real sale/holiday uplift.", ""]
     (report_dir / "dataset-analysis.md").write_text("\n".join(lines), encoding="utf-8")

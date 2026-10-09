@@ -67,8 +67,8 @@ Cấu hình mặc định ở [configs/base.yaml](configs/base.yaml):
 |---|---:|---|
 | `seed` | `20261002` | Seed cho Mimesis và các quyết định ngẫu nhiên |
 | `customers` | `1000` | Số khách hàng/tài khoản được sinh |
-| `transactions_per_customer` | `500` | Số giao dịch mỗi khách hàng |
-| `anomaly_rate` | `0.02` | Xác suất gắn nhãn scenario bất thường cho mỗi giao dịch |
+| `transactions_per_customer` | `500` | Ngân sách giao dịch trung bình mỗi khách hàng; tổng = customers × giá trị này |
+| `anomaly_rate` | `0.02` | Tỷ lệ mục tiêu phân bổ contextual scenarios; warmup và budget có thể ảnh hưởng số nhãn thực tế |
 | `start_at` | `2025-01-01T00:00:00+07:00` | Thời điểm bắt đầu mô phỏng |
 | `days` | `181` | Độ dài mô phỏng; mặc định bao trọn tháng 1 đến hết tháng 6/2025 |
 | `output_dir` | `data/generated` | Thư mục JSONL và manifest |
@@ -76,9 +76,9 @@ Cấu hình mặc định ở [configs/base.yaml](configs/base.yaml):
 
 Lịch lễ mặc định là profile demo Việt Nam năm 2025. Payday, ngày đôi, cuối tháng, Tết và ngày lễ làm thay đổi xác suất chọn ngày phát sinh giao dịch. Các hệ số là giả định mô phỏng để tạo biến động có kiểm soát, không phải mức tăng được đo từ ngân hàng/nhà bán lẻ. Lịch nghỉ 2025 dựa trên [thông báo lịch nghỉ của Chính phủ](https://xaydungchinhsach.chinhphu.vn/lich-nghi-tet-nguyen-dan-at-ty-2025-119241127052424956.htm).
 
-Vì mỗi khách hàng được sinh số lượng giao dịch cố định trong toàn kỳ, mức chênh giữa các tháng đến từ độ dài tháng và việc dồn giao dịch vào các ngày có trọng số cao; tổng giao dịch toàn kỳ không tăng do sale. Seed giống nhau cùng cấu hình sẽ tái lập dữ liệu.
+Tổng ngân sách giao dịch cố định được phân bổ khác nhau theo activity profile; mức chênh giữa các tháng đến từ độ dài tháng và việc dồn giao dịch vào các ngày có trọng số cao; tổng giao dịch toàn kỳ không tăng do sale. Seed giống nhau cùng cấu hình sẽ tái lập dữ liệu.
 
-Mặc định tạo **1.000 khách hàng × 500 giao dịch = 500.000 giao dịch** trong 181 ngày. Số lifecycle event lớn hơn số giao dịch vì mỗi giao dịch có event yêu cầu và event kết quả. Tỷ lệ anomaly 2% là xác suất sinh, không đảm bảo đúng 10.000 nhãn.
+Mặc định tạo **1.000 khách hàng × 500 giao dịch = 500.000 giao dịch** trong 181 ngày. Số lifecycle event lớn hơn số giao dịch vì mỗi giao dịch có event yêu cầu và event kết quả. Tỷ lệ anomaly 2% là mục tiêu của bộ lập lịch scenario; số thực tế được báo trong labels/manifest, có thể khác do làm tròn hoặc budget cho warmup.
 
 ## Output
 
@@ -92,6 +92,7 @@ Mặc định generator tạo:
 | `loan_applications.jsonl` | Yêu cầu vay, kỳ hạn, đánh giá và trạng thái |
 | `loans.jsonl` | Khoản vay được duyệt, dư nợ, lãi suất, kỳ hạn |
 | `transactions.jsonl` | Snapshot kết quả giao dịch với thời gian, loại, kênh, số tiền, fee và calendar context |
+| `behavior_profiles.jsonl` | Metadata audit của generator (giờ/channel ưa thích, thu nhập, typical amount); không dùng làm oracle feature |
 | `counterparties.jsonl` | Merchant và điểm cash dùng chung, làm node ngoài account |
 | `transfer_events.jsonl` | Lifecycle transfer theo contract camelCase của Anomaly, schema version 1 |
 | `events.jsonl` | Event bất biến, đã sắp theo `occurred_at` để replay |
@@ -138,7 +139,7 @@ src/anomaly_data_pipeline/
 
 ## Phạm vi hiện tại
 
-PaySim là nguồn tham khảo profile giao dịch, không được tải hay nhập trực tiếp. Generator hiện tạo kịch bản amount-outlier theo mức giao dịch thường của từng khách hàng, có giao dịch lớn hợp lệ chồng lấn; chưa có velocity, account takeover, structuring hay bất thường dựa trên lịch trả nợ. Output là JSONL phục vụ phát triển và phân tích, chưa có MongoDB sink hoặc consumer replay nối vào detector.
+PaySim là nguồn tham khảo profile giao dịch, không được tải hay nhập trực tiếp. Generator có contextual_amount, velocity_burst, graph_fan_in và rapid_forwarding; chưa có account takeover, structuring hay bất thường dựa trên lịch trả nợ. Output là JSONL phục vụ phát triển và phân tích, chưa có MongoDB sink hoặc consumer replay nối vào detector.
 
 ## Dữ liệu train và event lifecycle (dataset schema 2)
 
@@ -167,3 +168,19 @@ nix develop
 ```
 
 Bộ kiểm tra xác nhận replay balance toàn cục, contract transfer, label join, người nhận dùng chung, amount chồng lấn, kết quả tái lập theo seed và report chạy với schema mới. Dữ liệu/report cũ không tự được chuyển đổi; chạy lại `make pipeline` để tạo schema 2 và cập nhật dashboard.
+
+
+## Contextual scenarios v3
+
+Contract dataset/event vẫn là schema 2, native transfer schema 1. Manifest thêm `scenario_profile=contextual-v3`, snapshot generation/pipeline config và output behavior profiles để phân biệt cách dựng dữ liệu với bộ amount-only cũ.
+
+Tổng mặc định vẫn 500.000 giao dịch nhưng mỗi account có số lượng khác nhau theo activity weight. Typical amount gắn với thu nhập và tần suất; customer có giờ/channel/receiver ưa thích. CASH_IN định kỳ theo payday là lifecycle giao dịch thật, nằm trong tổng budget. Cash-in bổ sung là nguồn tiền bên ngoài hệ thống được mô phỏng, không phải dòng tiền suy ra từ loan. Ledger loan vẫn riêng và không đưa vào feature.
+
+- `contextual_amount`: amount lớn tương đối, giờ ngoài khung thường và channel ít dùng, ưu tiên receiver chưa gặp. Giao dịch lớn hợp lệ giữ giờ/channel/đối tác theo profile nên không phải cùng phân bố có nhãn ngẫu nhiên.
+- `velocity_burst`: các request dồn trong thời gian ngắn; hai request đầu là warmup normal, positive chỉ sau khi đã có hai request trước trong 120 giây.
+- `graph_fan_in`: nhiều account chuyển vào một hub; ba nguồn đầu là warmup normal, positive chỉ sau khi có ít nhất ba nguồn khác nhau trước đó trong 600 giây.
+- `rapid_forwarding`: hub gửi tiếp sau fan-in đã quan sát. Dấu hiệu dùng transfer attempts; không mặc định tất cả chuyển khoản đều hoàn tất.
+
+Tên scenario/nhãn chỉ ở sidecar. Không đưa profile generation, scenario marker, label hoặc kết quả xử lý vào request payload. Profile preferences của detector phải học từ lịch sử đã quan sát; không đọc oracle `behavior_profiles.jsonl`. Đây vẫn là mô phỏng theo giả định; rule được thiết kế theo scenario không phải benchmark thực tế hoặc bằng chứng GATv2 hiệu quả.
+
+Các tham số activity, giờ/channel, income/spending, amount và scenario timing/weights nằm trong options của transactions stage ở TOML. Income và scenario slots tiêu thụ ngân sách tổng; giữ warmup là normal để nhãn không cần nhìn tương lai. Ở quy mô quá nhỏ, một số scenario không đủ actor/budget.

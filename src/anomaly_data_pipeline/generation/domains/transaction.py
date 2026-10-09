@@ -15,18 +15,25 @@ def _key(r: Row) -> str:
 
 # --- scratch state (order = rng draw order) -----------------------------------
 @TRANSACTION.field("anomaly", scratch=True)
-def anomaly(r: Row): return r.rng.random() < r.ctx.config.anomaly_rate
+def anomaly(r: Row): return r.scratch['scenario'] != 'normal'
 
 @TRANSACTION.field("tx_type", scratch=True)
 def tx_type(r: Row):
-    return r.rng.choices(r.opts["types"], weights=r.opts["type_weights"])[0]
+    return r.scratch.get("planned_type") or r.rng.choices(r.opts["types"], weights=r.opts["type_weights"])[0]
 
 @TRANSACTION.field("raw_amount", scratch=True)
 def raw_amount(r: Row):
-    # Customer-relative outliers overlap legitimate large purchases.
-    high = r.scratch["anomaly"] or r.rng.random() < r.opts["normal_large_probability"]
-    bounds = r.opts["outlier_multipliers"] if high else r.opts["normal_multipliers"]
-    return max(1, round(r.scratch["typical_amount"] * r.rng.uniform(*bounds)))
+    if r.scratch.get('planned_amount') is not None:
+        return max(1, r.scratch['planned_amount'])
+    if r.scratch['scenario'] == 'contextual_amount':
+        bounds = r.opts['outlier_multipliers']
+    elif r.scratch['scenario'] == 'normal' and r.rng.random() < r.opts['normal_large_probability']:
+        bounds = r.opts['legitimate_large_multipliers']
+    elif r.scratch['tx_type'] == 'CASH_IN':
+        bounds = r.opts['cash_in_multipliers']
+    else:
+        bounds = r.opts['normal_multipliers']
+    return max(1, round(r.scratch['typical_amount'] * r.rng.uniform(*bounds)))
 
 @TRANSACTION.field("tx_status", scratch=True)
 def tx_status(r: Row):
@@ -63,7 +70,7 @@ def amount(r: Row): return r.scratch["raw_amount"]
 def type_(r: Row): return r.scratch["tx_type"]
 
 @TRANSACTION.field("channel")
-def channel(r: Row): return r.rng.choice(r.opts["channels"])
+def channel(r: Row): return r.scratch["planned_channel"]
 
 @TRANSACTION.field("status")
 def status(r: Row): return r.scratch["tx_status"]

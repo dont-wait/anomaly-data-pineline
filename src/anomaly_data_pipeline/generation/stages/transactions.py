@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from collections import Counter, defaultdict
 from typing import Any
 
 from anomaly_data_pipeline.domain.models import Transaction
 from anomaly_data_pipeline.generation.domains.transaction import TRANSACTION
+from anomaly_data_pipeline.generation.calendar import calendar_tags
+from anomaly_data_pipeline.generation.behavior import build_profiles, channel, validate_options
+from anomaly_data_pipeline.generation.scenarios import schedule
 from anomaly_data_pipeline.generation.ids import stable_id
 from anomaly_data_pipeline.generation.transaction_events import emit_transaction_event
 from anomaly_data_pipeline.generation.stages.common import PipelineContext
@@ -19,6 +22,7 @@ def run(context: PipelineContext, options: dict[str, Any]) -> None:
         raise ValueError("Invalid receiver configuration")
     if set(options["channels"]) - {"web", "mobile", "desktop"}:
         raise ValueError("Channels must match Anomaly transfer events")
+    validate_options(options)
     rng, config = context.rng, context.config
     merchants = [stable_id(config.seed, "merchant", n) for n in range(options["merchant_count"])]
     cash_nodes = [stable_id(config.seed, "cash-counterparty", n) for n in range(options["cash_counterparty_count"])]
@@ -26,38 +30,39 @@ def run(context: PipelineContext, options: dict[str, Any]) -> None:
         for node in pool:
             context.write("counterparties", {"_id": node, "type": kind, "created_at": context.start.isoformat()})
     balances = {a["_id"]: a["balance"]["current"] for a in context.accounts}
-    profiles, schedule = {}, []
-    for index, account in enumerate(context.accounts):
-        peers = [a["_id"] for a in context.accounts if a["_id"] != account["_id"]]
-        preferred = rng.sample(peers, min(len(peers), options["preferred_receivers"]))
-        profiles[index] = (peers, preferred, rng.randrange(options["typical_amount_min"], options["typical_amount_max"]))
-        for n in range(config.transactions_per_customer):
-            day = rng.choices(context.simulation_days, weights=context.date_weights, k=1)[0]
-            occurred = datetime.combine(day[0], datetime.min.time(), tzinfo=context.start.tzinfo) + timedelta(seconds=rng.randrange(86400))
-            # Respect a start_at that is not midnight.
-            occurred = max(occurred, context.start)
-            schedule.append((occurred, index, n, day))
-    schedule.sort(key=lambda item: item[:3])
-    previous = None
-    for occurred, index, n, day in schedule:
-        # Unique transaction times make chronological balance replay unambiguous.
-        if previous is not None and occurred <= previous:
-            occurred = previous + timedelta(microseconds=1)
-        previous = occurred
+    profiles = build_profiles(context, options)
+    seen = defaultdict(Counter)
+    for plan in schedule(context, profiles, options):
+        occurred, index, n = plan['occurred'], plan['index'], plan['transaction_index']
+        profile = profiles[index]
+        tags, _ = calendar_tags(occurred.date(), config.campaign_days)
+        day = (occurred.date(), tags)
         customer, account = context.customers[index], context.accounts[index]
-        peers, preferred, typical = profiles[index]
-        pool = preferred if rng.random() < options["repeat_receiver_probability"] else peers
-        receiver = rng.choice(pool) if pool else cash_nodes[0]
-        source = account["_id"]
+        source = account['_id']
         row = TRANSACTION.build(context, index, options, scratch={
             "customer": customer, "account": account, "balance": balances[source],
             "transaction_index": n, "occurred": occurred, "day": day,
-            "typical_amount": typical, "destination_type": "account", "destination_id": receiver})
+            "typical_amount": profile['typical_amount'], "destination_type": "account", "destination_id": source,
+            "scenario": plan['scenario'], "planned_type": plan.get('tx_type'), "planned_amount": plan.get('amount'),
+            "planned_channel": plan.get('forced_channel') or channel(context, profile, options)})
         tx_type = row.data["type"]
-        if tx_type in {"PAYMENT", "DEBIT"}:
-            row.data["destination"] = {"type": "merchant", "account_id": rng.choice(merchants)}
-        elif tx_type in {"CASH_IN", "CASH_OUT"}:
-            row.data["destination"] = {"type": "cash", "account_id": rng.choice(cash_nodes)}
+        if tx_type == 'TRANSFER':
+            pool = profile['peer_ids']
+            favorite = profile['favorite_ids']
+            destination_type = 'account'
+        elif tx_type in {'PAYMENT', 'DEBIT'}:
+            pool, favorite, destination_type = merchants, [merchants[profile['merchant']]], 'merchant'
+        else:
+            pool, favorite, destination_type = cash_nodes, [cash_nodes[profile['cash']]], 'cash'
+        if 'receiver' in plan:
+            receiver = context.accounts[plan['receiver']]['_id']
+        elif plan['scenario'] == 'contextual_amount':
+            unseen = [v for v in pool if v not in seen[source] and v not in favorite]
+            receiver = rng.choice(unseen or [v for v in pool if v not in favorite] or pool)
+        else:
+            receiver = rng.choice(favorite if rng.random() < options['repeat_receiver_probability'] else pool)
+        row.data['destination'] = {'type': destination_type, 'account_id': receiver}
+        seen[source][receiver] += 1
         tx = Transaction.model_validate(row.data)
         context.write("transactions", tx)
         destination = tx.destination["account_id"]
@@ -86,5 +91,5 @@ def run(context: PipelineContext, options: dict[str, Any]) -> None:
         balances[source] = after
         context.write("labels", {"event_id": created.event_id, "transaction_id": tx.transaction_id,
                                  "is_anomaly": row.scratch["anomaly"],
-                                 "scenario_id": "amount_outlier" if row.scratch["anomaly"] else "normal",
+                                 "scenario_id": plan["scenario"],
                                  "source_profile": config.source_profile})
