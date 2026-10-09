@@ -48,6 +48,8 @@ def generate(config: GenerationConfig, output_dir: Path,
                 "end_date_exclusive": (start.date() + timedelta(days=config.days)).isoformat(),
                 "days": config.days, "campaign_days": config.campaign_days,
                 "schema_version": pipeline["manifest"]["schema_version"], "counts": counts,
-                "notes": pipeline["manifest"]["notes"]}
+                "notes": pipeline["manifest"]["notes"],
+                "generation_config": config.model_dump(), "pipeline_config": pipeline,
+                "scenario_profile": "contextual-v4"}
     (output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     return counts
