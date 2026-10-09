@@ -23,8 +23,8 @@ def load_pipeline_config(path: Path = DEFAULT_PIPELINE_CONFIG) -> dict[str, obje
 
 class GenerationConfig(BaseModel):
     seed: int = 20261002
-    customers: int = Field(default=100, ge=1)
-    transactions_per_customer: int = Field(default=25, ge=1)
+    customers: int = Field(default=1000, ge=1)
+    transactions_per_customer: int = Field(default=500, ge=1)
     anomaly_rate: float = Field(default=0.02, ge=0, le=1)
     start_at: str = "2025-01-01T00:00:00+07:00"
     days: int = Field(default=180, ge=1)
