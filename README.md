@@ -66,8 +66,8 @@ Cấu hình mặc định ở [configs/base.yaml](configs/base.yaml):
 | Trường | Mặc định | Ý nghĩa |
 |---|---:|---|
 | `seed` | `20261002` | Seed cho Mimesis và các quyết định ngẫu nhiên |
-| `customers` | `100` | Số khách hàng/tài khoản được sinh |
-| `transactions_per_customer` | `25` | Số giao dịch mỗi khách hàng |
+| `customers` | `1000` | Số khách hàng/tài khoản được sinh |
+| `transactions_per_customer` | `500` | Số giao dịch mỗi khách hàng |
 | `anomaly_rate` | `0.02` | Xác suất gắn nhãn scenario bất thường cho mỗi giao dịch |
 | `start_at` | `2025-01-01T00:00:00+07:00` | Thời điểm bắt đầu mô phỏng |
 | `days` | `181` | Độ dài mô phỏng; mặc định bao trọn tháng 1 đến hết tháng 6/2025 |
@@ -77,6 +77,8 @@ Cấu hình mặc định ở [configs/base.yaml](configs/base.yaml):
 Lịch lễ mặc định là profile demo Việt Nam năm 2025. Payday, ngày đôi, cuối tháng, Tết và ngày lễ làm thay đổi xác suất chọn ngày phát sinh giao dịch. Các hệ số là giả định mô phỏng để tạo biến động có kiểm soát, không phải mức tăng được đo từ ngân hàng/nhà bán lẻ. Lịch nghỉ 2025 dựa trên [thông báo lịch nghỉ của Chính phủ](https://xaydungchinhsach.chinhphu.vn/lich-nghi-tet-nguyen-dan-at-ty-2025-119241127052424956.htm).
 
 Vì mỗi khách hàng được sinh số lượng giao dịch cố định trong toàn kỳ, mức chênh giữa các tháng đến từ độ dài tháng và việc dồn giao dịch vào các ngày có trọng số cao; tổng giao dịch toàn kỳ không tăng do sale. Seed giống nhau cùng cấu hình sẽ tái lập dữ liệu.
+
+Mặc định tạo **1.000 khách hàng × 500 giao dịch = 500.000 giao dịch** trong 181 ngày. Số lifecycle event lớn hơn số giao dịch vì mỗi giao dịch có event yêu cầu và event kết quả. Tỷ lệ anomaly 2% là xác suất sinh, không đảm bảo đúng 10.000 nhãn.
 
 ## Output
 
