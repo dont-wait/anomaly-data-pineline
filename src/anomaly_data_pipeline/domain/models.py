@@ -34,6 +34,11 @@ class Account(Record):
     created_at: datetime
 
 
+class DeviceContext(Record):
+    device_id: str = Field(min_length=1)
+    platform: Literal["android", "ios", "web", "desktop"]
+
+
 class Transaction(Record):
     transaction_id: str
     source: dict[str, Any]
@@ -48,6 +53,7 @@ class Transaction(Record):
     idempotency_key: str
     created_at: datetime
     posted_at: datetime | None = None
+    device: DeviceContext | None = None
 
 
 class Event(Record):

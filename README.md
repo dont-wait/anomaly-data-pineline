@@ -184,3 +184,10 @@ Tổng mặc định vẫn 500.000 giao dịch nhưng mỗi account có số lư
 Tên scenario/nhãn chỉ ở sidecar. Không đưa profile generation, scenario marker, label hoặc kết quả xử lý vào request payload. Profile preferences của detector phải học từ lịch sử đã quan sát; không đọc oracle `behavior_profiles.jsonl`. Đây vẫn là mô phỏng theo giả định; rule được thiết kế theo scenario không phải benchmark thực tế hoặc bằng chứng GATv2 hiệu quả.
 
 Các tham số activity, giờ/channel, income/spending, amount và scenario timing/weights nằm trong options của transactions stage ở TOML. Income và scenario slots tiêu thụ ngân sách tổng; giữ warmup là normal để nhãn không cần nhìn tương lai. Ở quy mô quá nhỏ, một số scenario không đủ actor/budget.
+
+
+### Request-time client devices
+
+Transaction generation now includes `transactions.device = {device_id, platform}` and the same `device_id`/`platform` in request event payloads. Device fields are not inferred from terminal outcomes. Configure `[stages.options.device]`: `enabled`, `new_device_probability`, `max_known_devices`, `mobile_platforms`, `mobile_platform_weights`. Mobile uses android/ios, web and desktop keep their platform.
+
+The device RNG is independent of transaction/scenario RNG and never reads anomaly labels or scenario names. Familiar devices may appear on anomaly requests; new devices may appear on normal requests. No oracle `new_device` flag is emitted: the detector computes novelty from strictly prior requests per account. Device IDs are synthetic client identifiers, not proof of real hardware identity. Disabled device context preserves transaction amounts/types/labels; snapshots contain null device. Go Backend enrichment is separate from this synthetic generator.

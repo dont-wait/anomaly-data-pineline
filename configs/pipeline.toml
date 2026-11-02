@@ -98,6 +98,14 @@ forward_fraction = 0.6
 holiday_tags = ["new_year", "tet_period", "hung_kings", "reunification_day", "labor_day", "holiday_bridge", "family_day"]
 
 
+[stages.options.device]
+enabled = true
+# Independent device RNG; neither labels nor scenario names are consulted.
+new_device_probability = 0.04
+max_known_devices = 3
+mobile_platforms = ["android", "ios"]
+mobile_platform_weights = [0.75, 0.25]
+
 [[stages]]
 name = "event_ordering"
 module = "anomaly_data_pipeline.generation.stages.event_ordering"

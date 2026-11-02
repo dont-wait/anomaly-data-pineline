@@ -50,6 +50,6 @@ def generate(config: GenerationConfig, output_dir: Path,
                 "schema_version": pipeline["manifest"]["schema_version"], "counts": counts,
                 "notes": pipeline["manifest"]["notes"],
                 "generation_config": config.model_dump(), "pipeline_config": pipeline,
-                "scenario_profile": "contextual-v4"}
+                "scenario_profile": "contextual-v5-device" if any(s.get("options",{}).get("device",{}).get("enabled",False) for s in pipeline["stages"]) else "contextual-v4"}
     (output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     return counts
