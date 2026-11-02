@@ -9,6 +9,7 @@ from anomaly_data_pipeline.generation.calendar import calendar_tags
 from anomaly_data_pipeline.generation.behavior import build_profiles, channel, validate_options
 from anomaly_data_pipeline.generation.scenarios import schedule
 from anomaly_data_pipeline.generation.ids import stable_id
+from anomaly_data_pipeline.generation.devices import DeviceHistory
 from anomaly_data_pipeline.generation.transaction_events import emit_transaction_event
 from anomaly_data_pipeline.generation.stages.common import PipelineContext
 
@@ -30,6 +31,8 @@ def run(context: PipelineContext, options: dict[str, Any]) -> None:
         for node in pool:
             context.write("counterparties", {"_id": node, "type": kind, "created_at": context.start.isoformat()})
     balances = {a["_id"]: a["balance"]["current"] for a in context.accounts}
+    device_options=options.get('device',{})
+    devices=DeviceHistory(config.seed,device_options) if device_options.get('enabled',False) else None
     profiles = build_profiles(context, options)
     seen = defaultdict(Counter)
     for plan in schedule(context, profiles, options):
@@ -63,6 +66,7 @@ def run(context: PipelineContext, options: dict[str, Any]) -> None:
             receiver = rng.choice(favorite if rng.random() < options['repeat_receiver_probability'] else pool)
         row.data['destination'] = {'type': destination_type, 'account_id': receiver}
         seen[source][receiver] += 1
+        if devices is not None:row.data['device']=devices.next(source,row.data['channel'])
         tx = Transaction.model_validate(row.data)
         context.write("transactions", tx)
         destination = tx.destination["account_id"]
@@ -76,8 +80,11 @@ def run(context: PipelineContext, options: dict[str, Any]) -> None:
         else:
             request_type = "TransactionRequested"
             request["transactionType"] = tx_type
+        if tx.device is not None:
+            request.update(device_id=tx.device.device_id,platform=tx.device.platform)
         created = emit_transaction_event(context, tx, request_type, 1, request)
-        result = dict(request, status="success" if tx.status == "success" else "cancelled" if tx_type == "TRANSFER" else "failed")
+        terminal_request={k:v for k,v in request.items() if k not in ('device_id','platform')}
+        result = dict(terminal_request, status="success" if tx.status == "success" else "cancelled" if tx_type == "TRANSFER" else "failed")
         result.update(sourceBalanceBefore=before, sourceBalanceAfter=after)
         if tx_type == "TRANSFER":
             dest_before = balances[destination]
